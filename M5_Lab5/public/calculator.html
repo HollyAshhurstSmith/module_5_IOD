@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Calculator Example</title>
+</head>
+<body>
+  <h1>Simple Calculator</h1>
+
+  <label for="num1">Number 1:</label>
+  <input type="number" id="num1" />
+  <br/>
+
+  <label for="num2">Number 2:</label>
+  <input type="number" id="num2" />
+  <br/>
+
+  <label for="operation">Operation:</label>
+  <select id="operation">
+    <option value="add">Add</option>
+    <option value="subtract">Subtract</option>
+    <option value="multiply">Multiply</option>
+    <option value="divide">Divide</option>
+  </select>
+  <br/>
+
+  <button onclick="calculate()">Calculate</button>
+
+  <div>
+    <strong>Result:</strong> <span id="result"></span>
+  </div>
+
+  <script>
+    function calculate() {
+      const num1 = document.getElementById('num1').value;
+      const num2 = document.getElementById('num2').value;
+      const operation = document.getElementById('operation').value;
+
+      fetch(`/calculator/${operation}?num1=${num1}&num2=${num2}`)
+        .then(response => response.json())
+        .then(data => {
+          if (data.result !== undefined) {
+            document.getElementById("result").innerText = data.result;
+          } else {
+            document.getElementById("result").innerText = data.error || 'Unexpected response';
+          }
+        })
+        .catch(err => {
+          console.error('Fetch error:', err);
+          document.getElementById("result").innerText = 'Error fetching result';
+        });
+    }
+  </script>
+</body>
+</html>

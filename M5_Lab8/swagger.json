@@ -1,0 +1,70 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "Fake Store API",
+    "description": "Backend API for Fake eCommerce Store",
+    "license": {
+      "name": "MIT",
+      "url": "https://opensource.org/licenses/MIT"
+    }
+  },
+  "host": "localhost:3000",
+  "basePath": "/",
+  "tags": [
+    {
+      "name": "Products",
+      "description": "Endpoints for product data"
+    }
+  ],
+  "schemes": ["http"],
+  "consumes": ["application/json"],
+  "produces": ["application/json"],
+  "paths": {
+    "/api/products": {
+      "get": {
+        "tags": ["Products"],
+        "summary": "Get all products",
+        "description": "Fetches all products from the Fake Store API",
+        "responses": {
+          "200": {
+            "description": "List of all products"
+          },
+          "500": {
+            "description": "Server error when fetching products"
+          }
+        }
+      }
+    },
+    "/api/products/{id}": {
+      "get": {
+        "tags": ["Products"],
+        "summary": "Get a product by ID",
+        "description": "Fetches a single product by ID from the Fake Store API",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "description": "The ID of the product"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A single product object"
+          },
+          "400": {
+            "description": "Invalid product ID (not a number)"
+          },
+          "404": {
+            "description": "Product not found"
+          },
+          "500": {
+            "description": "Server error when fetching product"
+          }
+        }
+      }
+    }
+  }
+}

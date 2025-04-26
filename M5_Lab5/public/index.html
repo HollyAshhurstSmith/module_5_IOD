@@ -1,0 +1,201 @@
+<!DOCTYPE html> <!-- Combination of code from previous labs, module slides, class recordings, chatGPT, -->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Cards with Search and Sorting</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.1/dist/echarts.min.js"></script>
+    <!-- Iconify library -->
+    <script src="https://code.iconify.design/iconify-icon/2.3.0/iconify-icon.min.js"></script>
+    <style>
+      /* CSS to make images the same size */
+      .card-img-top {
+        width: 100%; 
+        height: 400px; 
+        object-fit: contain;
+      }
+
+      /* Make the card description area scrollable */
+      .card-body {
+        height: 250px; 
+        overflow-y: auto; 
+      }
+
+      /* Style for the icon */
+      .icon-container {
+        font-size: 1.5rem;
+        color: #434242;
+        margin-left: 10px; /* Add space between the price and icon */
+        vertical-align: middle; /* Align the icon with the middle of the text */
+      }
+
+      /* Price container with flex layout to align icon and price */
+      .price-container {
+        display: flex;
+        align-items: center; /* Align the icon and price horizontally */
+        justify-content: space-between; /* Ensure space between price and the icon */
+      }
+
+      /* Optional: Add some spacing between cards for clarity */
+      .card {
+        margin-bottom: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="#">Navbar</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav">
+            <li class="nav-item">
+              <a class="nav-link active" aria-current="page" href="#">Home</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">Features</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">Pricing</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Search and Sorting (Side by Side) -->
+    <div class="container my-5">
+      <div class="row">
+        <!-- Search Input -->
+        <div class="col-md-6">
+          <input type="text" id="searchInput" class="form-control" placeholder="Search for a product..." />
+        </div>
+
+        <!-- Sorting Dropdown -->
+        <div class="col-md-6">
+          <select id="sortOptions" class="form-select">
+            <option value="none">Sort by</option>
+            <option value="price-asc">Price: Low to High</option>
+            <option value="price-desc">Price: High to Low</option>
+            <option value="title-asc">Title: A to Z</option>
+            <option value="title-desc">Title: Z to A</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Container to display fetched data -->
+    <div class="container my-5" id="card-container">
+      <div class="row" id="product-row">
+        <!-- The products will be appended here dynamically -->
+      </div>
+    </div>
+
+    <!-- Bootstrap JS and Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script type="text/javascript">
+      let allProducts = [];  // This will hold all the fetched products
+
+      // Fetching data from FakeStore API
+      fetch('https://fakestoreapi.com/products')
+        .then((response) => response.json())
+        .then((data) => {
+          // Save all products to the global variable
+          allProducts = data;
+          // Initially display all products
+          displayProducts(data);
+        })
+        .catch((error) => {
+          console.error('Error fetching data:', error);
+        });
+
+      // Function to display products as cards
+      function displayProducts(products) {
+        const productRow = document.getElementById('product-row');
+        productRow.innerHTML = '';  // Clear previous cards
+
+        // Loop through each product and create a card
+        products.forEach(product => {
+          const card = document.createElement('div');
+          card.classList.add('col-md-4'); // For a 3-column layout on medium screens
+
+          // Conditionally add the icon next to the price based on the category
+          let iconHtml = '';
+          if (product.category === "jewelery") {
+            iconHtml = `
+              <iconify-icon icon="map:jewelry-store" width="20" height="20"></iconify-icon>
+            `;
+          } else if (product.category === "men's clothing" || product.category === "women's clothing") {
+            iconHtml = `
+              <iconify-icon icon="mdi:tshirt-crew" width="20" height="20" style="color: #434242"></iconify-icon>
+            `;
+          } else if (product.category === "electronics") {
+            iconHtml = `
+              <iconify-icon icon="mi:computer" width="20" height="20" style="color: #434242"></iconify-icon>
+            `;
+          }
+
+          // Create individual card content
+          card.innerHTML = `
+            <div class="card mb-4" style="width: 18rem;">
+              <img src="${product.image}" class="card-img-top" alt="${product.title}">
+              <div class="card-body">
+                <h5 class="card-title">${product.title}</h5>
+                <p class="card-text">${product.description}</p>
+                <div class="price-container">
+                  <p class="card-text"><strong>Price: $${product.price}</strong></p>
+                  ${iconHtml} <!-- Add the icon next to the price if the category is jewelry, clothing, or electronics -->
+                </div>
+              </div>
+            </div>
+          `;
+
+          // Append the card to the row container
+          productRow.appendChild(card);
+        });
+      }
+
+      // Add an event listener for the search input field
+      document.getElementById('searchInput').addEventListener('input', function(event) {
+        const searchQuery = event.target.value.toLowerCase();
+
+        // Filter the products based on the search query
+        const filteredProducts = allProducts.filter(product => {
+          return product.title.toLowerCase().includes(searchQuery) || 
+                 product.description.toLowerCase().includes(searchQuery);
+        });
+
+        // Display the filtered products
+        displayProducts(filteredProducts);
+      });
+
+      // Add an event listener for the sorting dropdown
+      document.getElementById('sortOptions').addEventListener('change', function(event) {
+        const sortOption = event.target.value;
+
+        let sortedProducts = [...allProducts]; // Make a copy of the products array
+
+        // Sorting logic based on selected option
+        if (sortOption === 'price-asc') {
+          sortedProducts.sort((a, b) => a.price - b.price);
+        } else if (sortOption === 'price-desc') {
+          sortedProducts.sort((a, b) => b.price - a.price);
+        } else if (sortOption === 'title-asc') {
+          sortedProducts.sort((a, b) => a.title.localeCompare(b.title));
+        } else if (sortOption === 'title-desc') {
+          sortedProducts.sort((a, b) => b.title.localeCompare(a.title));
+        }
+
+        // Display the sorted products
+        displayProducts(sortedProducts);
+      });
+    </script>
+  </body>
+</html>
